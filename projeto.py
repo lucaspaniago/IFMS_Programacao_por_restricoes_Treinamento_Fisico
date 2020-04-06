@@ -10,21 +10,9 @@ restricoes = {
 }
 
 def obter_selecao_de_exercicios(restricoes, exercicios):
-    '''
-        Como ainda não tem restrições pelas necessidades dos alunos, gero aleatóriamente a lista
-        de exercícios selecionados
-    '''
-    global quantidadeDeExercicios
-
-    if restricoes: # equivalente a len(restricoes) > 0
-        exerciciosSelecionados = filtra_exercicios(exercicios)
-
-        while len(exerciciosSelecionados) < quantidadeDeExercicios:
-            quantidadeDeExercicios = int(input(f"Existem apenas {len(exerciciosSelecionados)} exercicios que satisfazem as exigências. Diminua a quantidade de exercícios para este músculo.\nDigite a nova quantidade: "))
-            
-        return seleciona_amostra(exerciciosSelecionados, quantidadeDeExercicios)
-    else:
-        return seleciona_amostra(exercicios, quantidadeDeExercicios)
+    copia_exercicios = exercicios[:]
+    random.shuffle(copia_exercicios)
+    return filtra_exercicios(copia_exercicios) if restricoes else copia_exercicios
 
 def filtra_exercicios(exercicios):
     selecao = []
@@ -37,9 +25,6 @@ def filtra_exercicios(exercicios):
             selecao.append(exercicio)
     
     return selecao
-
-def seleciona_amostra(exercicios, quantidade):
-    return [exercicios[i] for i in random.sample(range(len(exercicios)), quantidade)]
 
 if __name__ == '__main__':
     model = cp_model.CpModel()
@@ -59,7 +44,6 @@ if __name__ == '__main__':
 
     model.Add(tempoTotal <= 60*60)
     model.Add(exerciciosTotal == quantidadeDeExercicios)
-
 
     solver = cp_model.CpSolver()
     status = solver.Solve(model)
