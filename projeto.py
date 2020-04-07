@@ -32,9 +32,10 @@ if __name__ == '__main__':
     variaveis = []
     exerciciosSelecionados = obter_selecao_de_exercicios(restricoes, exercicios)
 
+    '''
     for ex in enumerate(exerciciosSelecionados):
         print(ex, end="\n")
-
+    '''
     for exercicio in exerciciosSelecionados:
         variaveis.append(model.NewIntVar(0, 1, "{}".format(exercicio['nome'])))
     '''
@@ -46,13 +47,7 @@ if __name__ == '__main__':
     tempos = [variaveis[i] * exerciciosSelecionados[i]['tempo'] for i in range(len(variaveis))]
     tempoTotal = sum(tempos)
 
-    #Ver com o professor como fazer isso utilizando "construtores" de lista
     nivel = [variaveis[i] for i in range(len(variaveis)) if restricoes['nivel'] in exerciciosSelecionados[i]['nivel']]
-    
-    '''nivel = []
-    for i in range(len(variaveis)):
-        if restricoes['nivel'] in exerciciosSelecionados[i]['nivel']:
-            nivel.append(variaveis[i])'''
     nivelTotal = sum(nivel)
 
     model.Minimize(tempoTotal)
