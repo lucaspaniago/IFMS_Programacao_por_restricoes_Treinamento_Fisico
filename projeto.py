@@ -2,7 +2,7 @@ import random
 from ortools.sat.python import cp_model
 from exercicios import exercicios
 
-quantidadeDeExercicios = 4
+quantidadeDeExercicios = 2
 
 restricoes = {
     'objetivo': 'hipertrofia',
@@ -18,10 +18,11 @@ def filtra_exercicios(exercicios):
     selecao = []
 
     for exercicio in exercicios:
-        nivel_adequado = exercicio['nivel'] == restricoes['nivel']
+        #nivel_adequado =  restricoes['nivel'] in exercicio['nivel']
         objetivo_adequado = restricoes['objetivo'] in exercicio['objetivos']
-
-        if nivel_adequado and objetivo_adequado:
+        
+        '''Retirei o "nivel_adequado and" do if abaixo'''
+        if objetivo_adequado:
             selecao.append(exercicio)
     
     return selecao
@@ -31,19 +32,34 @@ if __name__ == '__main__':
     variaveis = []
     exerciciosSelecionados = obter_selecao_de_exercicios(restricoes, exercicios)
 
+    for ex in enumerate(exerciciosSelecionados):
+        print(ex, end="\n")
+
     for exercicio in exerciciosSelecionados:
         variaveis.append(model.NewIntVar(0, 1, "{}".format(exercicio['nome'])))
-
-    exercicios = [variaveis[i] for i in range(quantidadeDeExercicios)]
+    '''
+    A partir daqui, sabemos que len(variaveis) == len(exerciciosSelecionados)
+    '''
+    exercicios = [variaveis[i] for i in range(len(variaveis))]
     exerciciosTotal = sum(exercicios)
 
     tempos = [variaveis[i] * exerciciosSelecionados[i]['tempo'] for i in range(len(variaveis))]
     tempoTotal = sum(tempos)
 
+    #Ver com o professor como fazer isso utilizando "construtores" de lista
+    nivel = [variaveis[i] for i in range(len(variaveis)) if restricoes['nivel'] in exerciciosSelecionados[i]['nivel']]
+    
+    '''nivel = []
+    for i in range(len(variaveis)):
+        if restricoes['nivel'] in exerciciosSelecionados[i]['nivel']:
+            nivel.append(variaveis[i])'''
+    nivelTotal = sum(nivel)
+
     model.Minimize(tempoTotal)
 
     model.Add(tempoTotal <= 60*60)
     model.Add(exerciciosTotal == quantidadeDeExercicios)
+    model.Add(nivelTotal == quantidadeDeExercicios)
 
     solver = cp_model.CpSolver()
     status = solver.Solve(model)
